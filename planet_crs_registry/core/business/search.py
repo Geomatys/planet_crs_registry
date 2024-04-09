@@ -104,7 +104,7 @@ class QuerySearch:
         endpoint: str,
         page: int,
         limit: int,
-        params: dict[str, str] | None = None,
+        params: dict[str, str | int] | None = None,
     ) -> Tuple[int, List]:
         """Query the WKTs for a given endpoint using the web service.
 
@@ -244,8 +244,9 @@ class QuerySearch:
                 time.sleep(0.2)
         return result
 
+    @staticmethod
     async def search_term(
-        self, search_term_kw: str, limit: int = 50, offset: int = 0
+        search_term_kw: str, limit: int = 50, offset: int = 0
     ) -> List[WKT_model]:
         """Search term in wkt ot id.
 
@@ -267,7 +268,8 @@ class QuerySearch:
             .offset(offset)
         )
 
-    async def search_term_count(self, search_term_kw: str) -> int:
+    @staticmethod
+    async def search_term_count(search_term_kw: str) -> int:
         """Count the result of the search term.
 
         Args:
@@ -280,7 +282,8 @@ class QuerySearch:
             Q(wkt__contains=search_term_kw) | Q(id__contains=search_term_kw)
         ).count()
 
-    async def get_wkt_obj(self, wkt_id: str) -> WKT_model:
+    @staticmethod
+    async def get_wkt_obj(wkt_id: str) -> WKT_model:
         """Retrieves the WKT representation from the database based on its id.
 
         Args:

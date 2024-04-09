@@ -1,4 +1,14 @@
-### fix(*): Correcting typos (HEAD -> feat/apache-sis)
+### fix(search.py): Marked a a few methods as static. Changed 'params' possible content type. (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 17:08:26 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### fix(*): Correcting typos (origin/feat/apache-sis)
 >Tue, 9 Apr 2024 17:02:54 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
@@ -8,7 +18,7 @@
 
 
 
-### fix(GML generation): Added a check to create the gml directory if it doesn't already exist. (origin/feat/apache-sis)
+### fix(GML generation): Added a check to create the gml directory if it doesn't already exist.
 >Tue, 9 Apr 2024 16:16:26 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
