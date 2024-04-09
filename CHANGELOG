@@ -1,4 +1,14 @@
-### fix(Makefile): Fixed the 'make help' function in Makefile (HEAD -> feat/apache-sis)
+### refactor(search.py): Code factorisation for search.py, avoiding a lot of repeating code. (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 15:24:20 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### fix(Makefile): Fixed the 'make help' function in Makefile
 >Tue, 9 Apr 2024 15:20:44 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
