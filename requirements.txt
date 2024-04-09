@@ -3,10 +3,12 @@ asyncpg==0.27.0
 fastapi==0.95.2
 httpx==0.24.1
 jinja2==3.1.2
+jpype1==1.5.0
 pydantic==1.10.2
 pydantic-xml[lxml]==0.2.2
 python-dotenv==0.21.0
 setuptools-scm==7.0.5
 tortoise-orm==0.19.3
+tqdm==4.66.2
 types-setuptools==65.4.0.0
 uvicorn==0.22

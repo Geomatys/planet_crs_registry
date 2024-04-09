@@ -137,3 +137,6 @@ docs/build/
 
 # IntelliJ
 .idea
+
+# ApacheSIS
+apache-sis-1.4-bin/
