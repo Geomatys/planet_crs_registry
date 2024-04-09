@@ -1,4 +1,14 @@
-### refactor(search.py): Code factorisation for search.py, avoiding a lot of repeating code. (HEAD -> feat/apache-sis)
+### feat(apache-sis): Added Apache SIS locally (version 1.4) (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 15:29:30 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### refactor(search.py): Code factorisation for search.py, avoiding a lot of repeating code.
 >Tue, 9 Apr 2024 15:24:20 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
