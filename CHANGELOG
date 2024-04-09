@@ -1,4 +1,14 @@
-### doc(GML): Added documentation for how to use the GML generator. (HEAD -> feat/apache-sis)
+### feat(docker): Updated Dockerfile to not use GDAL anymore. (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 15:39:29 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### doc(GML): Added documentation for how to use the GML generator.
 >Tue, 9 Apr 2024 15:38:03 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
