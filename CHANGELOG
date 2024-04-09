@@ -1,4 +1,14 @@
-### refactor(test): Refactored and optimized code for tests (HEAD -> feat/apache-sis)
+### fix(Makefile): Fixed the 'make help' function in Makefile (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 15:20:44 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### refactor(test): Refactored and optimized code for tests
 >Tue, 9 Apr 2024 15:18:47 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
