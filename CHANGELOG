@@ -1,4 +1,14 @@
-### feat(GML): Added a script for GML generation from WKT using Apache SIS. (HEAD -> feat/apache-sis)
+### doc(GML): Added documentation for how to use the GML generator. (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 15:38:03 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(GML): Added a script for GML generation from WKT using Apache SIS.
 >Tue, 9 Apr 2024 15:37:13 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
