@@ -1,4 +1,14 @@
-### feat(docker): Updated Dockerfile to not use GDAL anymore. (HEAD -> feat/apache-sis)
+### fix(GML generation): Added a check to create the gml directory if it doesn't already exist. (HEAD -> feat/apache-sis)
+>Tue, 9 Apr 2024 16:16:26 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(docker): Updated Dockerfile to not use GDAL anymore. (origin/feat/apache-sis)
 >Tue, 9 Apr 2024 15:39:29 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)

@@ -110,6 +110,9 @@ def generate_all_gml_files(path_to_directory: str) -> None:
 
     :param path_to_directory: Where the GML files are generated
     """
+    if not os.path.exists(path_to_directory):
+        os.makedirs(path_to_directory)
+
     directory_has_files = len(os.listdir(path_to_directory)) > 0
     if directory_has_files:
         reset_flag, override_flag = _get_user_choices()
