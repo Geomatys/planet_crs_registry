@@ -1,4 +1,14 @@
-### feat(GML generator): No longer only relies on a local installation of Apache SIS. Can now specify a installation anywhere on the disk. If no local installation is present, Apache SIS will automatically be downloaded. (HEAD -> feat/apache-sis)
+### fix(crs_response): Removed code that was needed because of GDAL. (HEAD -> feat/apache-sis)
+>Wed, 10 Apr 2024 17:26:46 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(GML generator): No longer only relies on a local installation of Apache SIS. Can now specify a installation anywhere on the disk. If no local installation is present, Apache SIS will automatically be downloaded. (origin/feat/apache-sis)
 >Wed, 10 Apr 2024 17:19:21 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
@@ -18,7 +28,7 @@
 
 
 
-### fix(search.py): Marked a a few methods as static. Changed 'params' possible content type. (origin/feat/apache-sis)
+### fix(search.py): Marked a a few methods as static. Changed 'params' possible content type.
 >Tue, 9 Apr 2024 17:08:26 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)

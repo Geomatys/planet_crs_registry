@@ -60,6 +60,7 @@ class GmlResponse(Response):
             bytes: the response in GML
         """
         gml_path = f"/planet_crs_registry/data/gml/{content}.xml"
+
         try:
             with open(gml_path, mode="rb") as gml_file:
                 data: bytes = gml_file.read()
@@ -71,17 +72,7 @@ class GmlResponse(Response):
             )
 
         data_str: str = data.decode("utf-8")
-        # data_str = data_str.replace(
-        #     "<gml:GeographicCRS",
-        #     '<gml:GeographicCRS xmlns:gml="http://www.opengis.net/gml/3.2"\
-        #          xmlns:gmd="http://www.isotc211.org/2005/gmd"',
-        # )
-        # data_str = data_str.replace(
-        #     "<gml:ProjectedCRS",
-        #     '<gml:ProjectedCRS xmlns:gml="http://www.opengis.net/gml/3.2"\
-        #          xmlns:gmd="http://www.isotc211.org/2005/gmd"',
-        # )
-        # data_str = data_str.replace("\n", "")
+
         return Response(content=data_str, media_type="application/xml").render(
             data_str
         )
