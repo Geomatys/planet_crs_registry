@@ -118,10 +118,10 @@ def get_apache_sis_path(
     if os.path.exists(apache_sis_directory):
         return False, [apache_sis_directory]
 
-    apache_sis_directory = _get_input_apache_sis_directory()
+    input_apache_sis_directory = _get_input_apache_sis_directory()
 
-    if apache_sis_directory is not None:
-        return False, [apache_sis_directory]
+    if input_apache_sis_directory is not None:
+        return False, [input_apache_sis_directory]
 
     _APACHE_URL = f"https://dlcdn.apache.org/sis/{apache_sis_version}/apache-sis-{apache_sis_version}-bin.zip"
     try:

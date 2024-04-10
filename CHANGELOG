@@ -1,4 +1,14 @@
-### fix(requirements): Removed librairies that are only used for gml_generator, which runs outside the project scope. (HEAD -> feat/apache-sis)
+### fix(GML generator): Fixed variable name. (HEAD -> feat/apache-sis)
+>Wed, 10 Apr 2024 17:37:45 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### fix(requirements): Removed librairies that are only used for gml_generator, which runs outside the project scope. (origin/feat/apache-sis)
 >Wed, 10 Apr 2024 17:32:15 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
@@ -8,7 +18,7 @@
 
 
 
-### fix(crs_response): Removed code that was needed because of GDAL. (origin/feat/apache-sis)
+### fix(crs_response): Removed code that was needed because of GDAL.
 >Wed, 10 Apr 2024 17:26:46 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
