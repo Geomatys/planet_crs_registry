@@ -136,11 +136,14 @@ if __name__ == "__main__":
     # Using ApacheSIS to generate the GML files
     _APACHE_SIS_VERSION = "1.4"
     _APACHE_SIS_PATH = f"apache-sis-{_APACHE_SIS_VERSION}-bin/apache-sis-{_APACHE_SIS_VERSION}/lib/*"
+
     jpype.startJVM(classpath=[_APACHE_SIS_PATH])
-    from org.apache.sis.referencing import CRS
-    from org.apache.sis.xml import XML
+    try:
+        from org.apache.sis.referencing import CRS
+        from org.apache.sis.xml import XML
 
-    _GENERATED_GML_PATH = "gml"
-    generate_all_gml_files(_GENERATED_GML_PATH)
+        _GENERATED_GML_PATH = "gml"
+        generate_all_gml_files(_GENERATED_GML_PATH)
 
-    jpype.shutdownJVM()
+    finally:
+        jpype.shutdownJVM()
