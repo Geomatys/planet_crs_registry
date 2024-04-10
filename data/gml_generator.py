@@ -233,7 +233,6 @@ def generate_all_gml_files(
         generate_gml_file_from_wkt(
             apache_jvm, output_directory, wkt_content, override_flag
         )
-        break
 
 
 def main() -> None:
