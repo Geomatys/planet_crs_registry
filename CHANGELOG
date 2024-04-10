@@ -1,4 +1,14 @@
-### fix(GML generator): try/finally to make sure the JVM always closes even when an error occurs. (HEAD -> feat/apache-sis)
+### feat(GML generator): No longer only relies on a local installation of Apache SIS. Can now specify a installation anywhere on the disk. If no local installation is present, Apache SIS will automatically be downloaded. (HEAD -> feat/apache-sis)
+>Wed, 10 Apr 2024 17:19:21 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### fix(GML generator): try/finally to make sure the JVM always closes even when an error occurs.
 >Wed, 10 Apr 2024 11:34:52 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)

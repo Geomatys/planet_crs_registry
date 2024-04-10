@@ -4,12 +4,6 @@ The `gml_generator.py` script generates GML files using Apache SIS, from a set o
 ## Requirements
 In order to run `gml_generator.py`, there are a few requirements.
 
-### Apache SIS
-If you have already installed Apache SIS locally, you can skip this part.
-* Go to the [ApacheSIS download page](https://sis.apache.org/downloads.html)
-* Download the latest version of the binary (e.g. `Apache SIS 1.4 binary`)
-* Extract the `zip` (e.g. `apache-sis-1.4-bin.zip` -> `apache-sis-1.4-bin`) in the same directory as `gml_generator.py`
-
 ### JPype
 JPype is used to make a bridge between the Python code and Java code. It is necessary to call Apache SIS's functions.
 
@@ -35,12 +29,16 @@ To run the script, go in the same directory as `gml_generator.py` and run the fo
 python gml_generator.py
 ```
 
-When running the script, you will be prompted two parameters:
+When running the script, you will be prompted a few parameters:
+* **Apache SIS**
+  * If you have local installation of Apache SIS in the same directory as the script, with the format `apache-sis-1.4`, this Apache SIS will be used for GML generation.
+  * Otherwise, you will be prompted the directory to a local installation of Apache SIS.
+  * If you don't have local installation, Apache SIS will automatically be downloaded (~12 MB). Note: Apache SIS directory will be deleted once the script is completed.
 * **Remove all existing GML files:** Whether you want to remove all GML files in the output directory. This can be useful to make sure you do not keep previously-generated GML files.
 * **Override existing GML files:** Whether you want to override existing GML files if they already exist.
 
-*Note: The prompt is not displayed if the output directory is empty.*
+*Note: The last two prompts are not displayed if the output directory is empty.*
 
 There will be a warning: `AVERTISSEMENT: La variable environnementale « SIS_DATA » n'est pas définie.` This references a variable used by the EPSG extension (for Apache SIS), which is not needed for IAU CRS. You can safely ignore that warning.
 
-GML files are generated in the `_GENERATED_GML_PATH` variable (default: `gml` directory).
+GML files are generated in the `gml` directory.
