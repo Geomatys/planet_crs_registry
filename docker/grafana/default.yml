@@ -1,0 +1,42 @@
+apiVersion: 1
+
+datasources:
+  - name: Jaeger
+    type: jaeger
+    uid: EbPG8fYoz
+    url: http://jaeger:16686
+    access: proxy
+    basicAuth: true
+    basicAuthUser: admin
+    readOnly: false
+    isDefault: true
+    jsonData:
+      tracesToLogsV2:
+        # Field with an internal link pointing to a logs data source in Grafana.
+        # datasourceUid value must match the uid value of the logs data source.
+        datasourceUid: EbPG8fYoz
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+        tags: ['job', 'instance', 'pod', 'namespace']
+        filterByTraceID: false
+        filterBySpanID: false
+        customQuery: true
+        query: 'method="${__span.tags.method}"'
+      tracesToMetrics:
+        datasourceUid: 'EbPG8fYoz'
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+        tags: [{ key: 'service.name', value: 'service' }, { key: 'job' }]
+        queries:
+          - name: 'Sample query'
+            query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+      nodeGraph:
+        enabled: true
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+      spanBar:
+        type: 'None'
+    secureJsonData:
+      basicAuthPassword: grafana
