@@ -31,13 +31,13 @@ class ApacheJVM:
 
 
 class GMLDataFiller:
-    def __init__(self, gml, iau_version, code):
+    def __init__(self, gml: str, iau_version: str, code: str) -> None:
         self.root_tree = etree.fromstring(gml.encode("utf-8"))
         self.gml_ns = "{" + self.root_tree.nsmap["gml"] + "}"
         self.iau_version = iau_version
         self.code = code
 
-    def get_gml(self):
+    def get_gml(self) -> bytes:
         return etree.tostring(self.root_tree)
 
     def add_necessary_data(self) -> None:

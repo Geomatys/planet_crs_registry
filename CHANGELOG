@@ -1,4 +1,14 @@
-### feat(GML generator): Added the GMLDataFiller class to fill the data needed for GML validation. (HEAD -> feat/gml)
+### refactor(GML generator): Added typing annotation. (HEAD -> feat/gml)
+>Thu, 18 Apr 2024 15:59:36 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(GML generator): Added the GMLDataFiller class to fill the data needed for GML validation. (origin/feat/gml)
 >Thu, 18 Apr 2024 09:59:39 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
