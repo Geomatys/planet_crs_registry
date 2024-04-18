@@ -7,6 +7,7 @@ from re import findall
 
 import jpype
 import requests
+from lxml import etree
 from tqdm import tqdm
 
 
@@ -27,6 +28,251 @@ class ApacheJVM:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         jpype.shutdownJVM()
+
+
+class GMLDataFiller:
+    def __init__(self, gml, iau_version, code):
+        self.root_tree = etree.fromstring(gml.encode("utf-8"))
+        self.gml_ns = "{" + self.root_tree.nsmap["gml"] + "}"
+        self.iau_version = iau_version
+        self.code = code
+
+    def get_gml(self):
+        return etree.tostring(self.root_tree)
+
+    def add_necessary_data(self) -> None:
+        """Adds ``<gml:identifier>``,  ``<gml:scope>``, and ``<gml:formula>``
+        to certain elements for GML validation."""
+        self._add_scope_if_missing(
+            self.root_tree,
+            ["domainOfValidity", "remarks", "name", "identifier"],
+        )
+
+        conversion = self.root_tree.find(
+            f"{self.gml_ns}conversion/{self.gml_ns}Conversion"
+        )
+        if conversion is not None:
+            root_identifier = self.root_tree.find(f"{self.gml_ns}identifier")
+            # Copies root identifier without moving it
+            identifier = etree.fromstring(etree.tostring(root_identifier))
+            conversion.insert(0, identifier)
+
+            self._add_scope_if_missing(
+                conversion,
+                ["domainOfValidity", "remarks", "name", "identifier"],
+            )
+
+            operation_method = conversion.find(
+                f"{self.gml_ns}method/{self.gml_ns}OperationMethod"
+            )
+            if operation_method is not None:
+                self._add_formula_if_missing(
+                    operation_method, ["remarks", "name", "identifier"]
+                )
+                self._add_identifier_on_parameters(operation_method)
+
+        cartesian_cs = self.root_tree.find(
+            f"{self.gml_ns}cartesianCS/{self.gml_ns}CartesianCS"
+        )
+        if cartesian_cs is not None:
+            self._add_identifier_if_missing(cartesian_cs, "cs")
+            self._add_identifier_on_axis(cartesian_cs)
+
+        spherical_cs = self.root_tree.find(
+            f"{self.gml_ns}sphericalCS/{self.gml_ns}SphericalCS"
+        )
+        if spherical_cs is not None:
+            self._add_identifier_if_missing(spherical_cs, "cs")
+            self._add_identifier_on_axis(spherical_cs)
+
+        geodetic_crs = self.root_tree.find(
+            f"{self.gml_ns}baseGeodeticCRS/{self.gml_ns}GeodeticCRS"
+        )
+        if geodetic_crs is not None:
+            self._add_scope_if_missing(
+                geodetic_crs,
+                ["domainOfValidity", "remarks", "name", "identifier"],
+            )
+            self.root_tree = geodetic_crs
+
+        ellipsoidal_cs = self.root_tree.find(
+            f"{self.gml_ns}ellipsoidalCS/{self.gml_ns}EllipsoidalCS"
+        )
+        if ellipsoidal_cs is not None:
+            self._add_identifier_if_missing(ellipsoidal_cs, "cs")
+            self._add_identifier_on_axis(ellipsoidal_cs)
+
+        geodetic_datum = self.root_tree.find(
+            f"{self.gml_ns}geodeticDatum/{self.gml_ns}GeodeticDatum"
+        )
+        if geodetic_datum is not None:
+            self._add_identifier_if_missing(geodetic_datum, "datum")
+            self._add_scope_if_missing(
+                geodetic_datum,
+                ["domainOfValidity", "remarks", "name", "identifier"],
+            )
+
+            prime_meridian = geodetic_datum.find(
+                f"{self.gml_ns}primeMeridian/{self.gml_ns}PrimeMeridian"
+            )
+            if prime_meridian is not None:
+                self._add_identifier_if_missing(prime_meridian, "meridian")
+
+            ellipsoid = geodetic_datum.find(
+                f"{self.gml_ns}ellipsoid/{self.gml_ns}Ellipsoid"
+            )
+            if ellipsoid is not None:
+                self._add_identifier_if_missing(ellipsoid, "ellipsoid")
+
+    def _insert_element_after(
+        self,
+        element: etree.Element,
+        element_to_insert: etree.Element,
+        prev_elem_name_list: list[str],
+    ) -> None:
+        """Internal function: Insert a given element into another element after a given element.
+
+        :param element: lxml.etree.Element to add the element into
+        :param element_to_insert: Element to insert
+        :param prev_elem_name_list: List of elements (str) you want to insert the element after,
+            picks whichever is there first, and pick the last iteration of the element
+        """
+        for previous_element_name in prev_elem_name_list:
+            all_elems = element.findall(self.gml_ns + previous_element_name)
+            if len(all_elems) >= 1:
+                index = element.index(all_elems[-1]) + 1
+                break
+        else:
+            index = 0
+
+        element.insert(index, element_to_insert)
+
+    def _add_scope_if_missing(
+        self, element: etree.Element, prev_elem_name_list: list[str]
+    ) -> None:
+        """Internal function: Adds ``<gml:scope>`` in the given element if it is missing.
+
+        :param element: lxml.etree.Element to add the scope into
+        :param prev_elem_name_list: List of elements (str) you want to insert the element after,
+            picks whichever is there first, and pick the last iteration of the element
+        """
+        scope = element.find(f"{self.gml_ns}scope")
+        if scope is not None:
+            return
+
+        # TODO: Replace with a non-placeholder scope
+        scope_element = etree.Element(f"{self.gml_ns}scope")
+        scope_element.text = "not known"
+
+        self._insert_element_after(element, scope_element, prev_elem_name_list)
+
+    def _add_formula_if_missing(
+        self, element: etree.Element, prev_elem_name_list: list[str]
+    ) -> None:
+        """Internal function: Adds ``<gml:formula>`` in the given element if it doesn't contain
+        either ``<gml:formula>`` or ``<gml:formulaCitation>``.
+
+        :param element: lxml.etree.Element to add the formula into
+        :param prev_elem_name_list: List of elements (str) you want to insert the element after,
+            picks whichever is there first, and pick the last iteration of the element
+        """
+        formula = element.find(f"{self.gml_ns}formula")
+        formula_citation = element.find(f"{self.gml_ns}formulaCitation")
+        if formula is not None or formula_citation is not None:
+            return
+
+        # TODO: Replace with a non-placeholder formula
+        formula_element = etree.Element(f"{self.gml_ns}formula")
+        formula_element.text = "not known"
+
+        self._insert_element_after(
+            element, formula_element, prev_elem_name_list
+        )
+
+    def _add_identifier_if_missing(
+        self, element: etree.Element, elem_type: str
+    ) -> None:
+        """Internal function: Adds ``<gml:identifier>`` in the given element if it is missing.
+
+        :param element: lxml.etree.Element to add the identifier into
+        :param elem_type: Type of element in the URN
+        """
+        identifier = element.find(f"{self.gml_ns}identifier")
+        if identifier is not None:
+            return
+
+        identifier_element = etree.Element(
+            f"{self.gml_ns}identifier", codeSpace="NAIF"
+        )
+        identifier_element.text = (
+            f"urn:ogc:def:{elem_type}:NAIF:{self.iau_version}:{self.code[:-2]}"
+        )
+        element.insert(0, identifier_element)
+
+    def _add_identifier_on_axis(self, element: etree.Element) -> None:
+        """Internal function: Adds ``<gml:identifier>`` to axis if they don't have it.
+
+        :param element: lxml.etree.Element to add the identifier into
+        """
+        axis = element.findall(f"{self.gml_ns}axis")
+        if len(axis) == 0:
+            return
+        for ax in axis:
+            coord = ax.find(f"{self.gml_ns}CoordinateSystemAxis")
+            if coord is None:
+                continue
+            identifier = coord.find(f"{self.gml_ns}identifier")
+            if identifier is not None:
+                continue
+
+            axis_type = coord.get(f"{self.gml_ns}id")
+            axis_to_epsg_code = {
+                "Easting": "1",
+                "Northing": "2",
+                "Westing": "UNDEFINED",
+                "GeodeticLatitude": "106",
+                "GeodeticLongitude": "107",
+                "planetocentricLatitude": "UNDEFINED",
+                "planetocentricLongitude": "UNDEFINED",
+            }
+            epsg_code = axis_to_epsg_code[axis_type]
+            identifier_element = etree.Element(
+                f"{self.gml_ns}identifier", codeSpace="IOGP"
+            )
+            identifier_element.text = f"urn:ogc:def:axis:EPSG::{epsg_code}"
+            coord.insert(0, identifier_element)
+
+    def _add_identifier_on_parameters(self, element: etree.Element) -> None:
+        """Internal function: Adds ``<gml:identifier>`` to parameters if they don't have it.
+
+        :param element: lxml.etree.Element to add the identifier into
+        """
+        parameters = element.findall(f"{self.gml_ns}parameter")
+        if len(parameters) == 0:
+            return
+        for param in parameters:
+            operation_parameter = param.find(
+                f"{self.gml_ns}OperationParameter"
+            )
+            if operation_parameter is None:
+                continue
+            identifier = operation_parameter.find(f"{self.gml_ns}identifier")
+            if identifier is not None:
+                continue
+
+            param_id = operation_parameter.get(f"{self.gml_ns}id")
+            if param_id.startswith("epsg-parameter-"):
+                parameter_code = param_id.split("-")[2]
+            else:
+                parameter_code = "UNDEFINED"
+
+            identifier_element = etree.Element(
+                f"{self.gml_ns}identifier", codeSpace="IOGP"
+            )
+            identifier_element.text = (
+                f"urn:ogc:def:parameter:EPSG::{parameter_code}"
+            )
+            operation_parameter.insert(0, identifier_element)
 
 
 def _remove_xml_files_in_directory(path_to_directory: str) -> None:
@@ -160,7 +406,7 @@ def generate_gml_file_from_wkt(
     :param wkt: Input WKT
     :param override_file_flag: Whether the user wants to override the file if it already exists
     """
-    # TODO: Placeholder replace(). Remove when ApacheSIS is updated.
+    # TODO: Placeholder "replace()" -> remove when ApacheSIS is updated.
     wkt = wkt.replace("GEOGCRS", "GEODCRS")
 
     try:
@@ -189,10 +435,14 @@ def generate_gml_file_from_wkt(
     try:
         # Apache SIS conversion from WKT to GML
         crs = apache_jvm.CRS.fromWKT(wkt)
-        result = str(apache_jvm.XML.marshal(crs))
+        gml = str(apache_jvm.XML.marshal(crs))
 
-        with open(path_to_file, mode="w") as output_file:
-            output_file.write(result)
+        data_filler = GMLDataFiller(gml, iau_version, code)
+        data_filler.add_necessary_data()
+        gml = data_filler.get_gml()
+
+        with open(path_to_file, mode="wb") as output_file:
+            output_file.write(gml)
 
     except jpype.JException as ex:
         raise RuntimeError(f"Java error: {ex.message()}")
