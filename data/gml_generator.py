@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import shutil
 import tempfile
@@ -24,10 +25,12 @@ class ApacheJVM:
         jpype.startJVM(classpath=[self.apache_sis_path])
         self.CRS = jpype.JClass("org.apache.sis.referencing.CRS")
         self.XML = jpype.JClass("org.apache.sis.xml.XML")
+        logging.debug("Opened Apache JVM")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         jpype.shutdownJVM()
+        logging.debug("Closed Apache JVM")
 
 
 class GMLDataFiller:
@@ -43,6 +46,8 @@ class GMLDataFiller:
     def add_necessary_data(self) -> None:
         """Adds ``<gml:identifier>``,  ``<gml:scope>``, and ``<gml:formula>``
         to certain elements for GML validation."""
+        logging.debug("Adding necessary data to GML...")
+
         self._add_scope_if_missing(
             self.root_tree,
             ["domainOfValidity", "remarks", "name", "identifier"],
@@ -52,10 +57,12 @@ class GMLDataFiller:
             f"{self.gml_ns}conversion/{self.gml_ns}Conversion"
         )
         if conversion is not None:
+            logging.debug("Found Conversion element")
             root_identifier = self.root_tree.find(f"{self.gml_ns}identifier")
             # Copies root identifier without moving it
             identifier = etree.fromstring(etree.tostring(root_identifier))
             conversion.insert(0, identifier)
+            logging.debug("Copied identifier from root_tree to Conversion")
 
             self._add_scope_if_missing(
                 conversion,
@@ -66,6 +73,7 @@ class GMLDataFiller:
                 f"{self.gml_ns}method/{self.gml_ns}OperationMethod"
             )
             if operation_method is not None:
+                logging.debug("Found OperationMethod element")
                 self._add_formula_if_missing(
                     operation_method, ["remarks", "name", "identifier"]
                 )
@@ -75,6 +83,7 @@ class GMLDataFiller:
             f"{self.gml_ns}cartesianCS/{self.gml_ns}CartesianCS"
         )
         if cartesian_cs is not None:
+            logging.debug("Found CartesianCS element")
             self._add_identifier_if_missing(cartesian_cs, "cs")
             self._add_identifier_on_axis(cartesian_cs)
 
@@ -82,6 +91,7 @@ class GMLDataFiller:
             f"{self.gml_ns}sphericalCS/{self.gml_ns}SphericalCS"
         )
         if spherical_cs is not None:
+            logging.debug("Found SphericalCS element")
             self._add_identifier_if_missing(spherical_cs, "cs")
             self._add_identifier_on_axis(spherical_cs)
 
@@ -89,6 +99,7 @@ class GMLDataFiller:
             f"{self.gml_ns}baseGeodeticCRS/{self.gml_ns}GeodeticCRS"
         )
         if geodetic_crs is not None:
+            logging.debug("Found GeodeticCRS element")
             self._add_scope_if_missing(
                 geodetic_crs,
                 ["domainOfValidity", "remarks", "name", "identifier"],
@@ -99,6 +110,7 @@ class GMLDataFiller:
             f"{self.gml_ns}ellipsoidalCS/{self.gml_ns}EllipsoidalCS"
         )
         if ellipsoidal_cs is not None:
+            logging.debug("Found EllipsoidalCS element")
             self._add_identifier_if_missing(ellipsoidal_cs, "cs")
             self._add_identifier_on_axis(ellipsoidal_cs)
 
@@ -106,6 +118,7 @@ class GMLDataFiller:
             f"{self.gml_ns}geodeticDatum/{self.gml_ns}GeodeticDatum"
         )
         if geodetic_datum is not None:
+            logging.debug("Found GeodeticDatum element")
             self._add_identifier_if_missing(geodetic_datum, "datum")
             self._add_scope_if_missing(
                 geodetic_datum,
@@ -116,12 +129,14 @@ class GMLDataFiller:
                 f"{self.gml_ns}primeMeridian/{self.gml_ns}PrimeMeridian"
             )
             if prime_meridian is not None:
+                logging.debug("Found PrimeMeridian element")
                 self._add_identifier_if_missing(prime_meridian, "meridian")
 
             ellipsoid = geodetic_datum.find(
                 f"{self.gml_ns}ellipsoid/{self.gml_ns}Ellipsoid"
             )
             if ellipsoid is not None:
+                logging.debug("Found Ellipsoid element")
                 self._add_identifier_if_missing(ellipsoid, "ellipsoid")
 
     def _insert_element_after(
@@ -165,6 +180,7 @@ class GMLDataFiller:
         scope_element.text = "not known"
 
         self._insert_element_after(element, scope_element, prev_elem_name_list)
+        logging.debug(f"Added scope to {element.tag.split('}')[1]}")
 
     def _add_formula_if_missing(
         self, element: etree.Element, prev_elem_name_list: list[str]
@@ -188,6 +204,7 @@ class GMLDataFiller:
         self._insert_element_after(
             element, formula_element, prev_elem_name_list
         )
+        logging.debug(f"Added formula to {element.tag.split('}')[1]}")
 
     def _add_identifier_if_missing(
         self, element: etree.Element, elem_type: str
@@ -208,6 +225,7 @@ class GMLDataFiller:
             f"urn:ogc:def:{elem_type}:NAIF:{self.iau_version}:{self.code[:-2]}"
         )
         element.insert(0, identifier_element)
+        logging.debug(f"Added identifier to {element.tag.split('}')[1]}")
 
     def _add_identifier_on_axis(self, element: etree.Element) -> None:
         """Internal function: Adds ``<gml:identifier>`` to axis if they don't have it.
@@ -241,6 +259,9 @@ class GMLDataFiller:
             )
             identifier_element.text = f"urn:ogc:def:axis:EPSG::{epsg_code}"
             coord.insert(0, identifier_element)
+            logging.debug(
+                f"Added identifier to {coord.tag.split('}')[1]} (axis)"
+            )
 
     def _add_identifier_on_parameters(self, element: etree.Element) -> None:
         """Internal function: Adds ``<gml:identifier>`` to parameters if they don't have it.
@@ -273,6 +294,9 @@ class GMLDataFiller:
                 f"urn:ogc:def:parameter:EPSG::{parameter_code}"
             )
             operation_parameter.insert(0, identifier_element)
+            logging.debug(
+                f"Added identifier to {operation_parameter.tag.split('}')[1]} (parameter)"
+            )
 
 
 def _remove_xml_files_in_directory(path_to_directory: str) -> None:
@@ -362,20 +386,32 @@ def get_apache_sis_path(
     :return: Boolean indicating if we created a temporary directory and a path to Apache SIS
     """
     if os.path.exists(apache_sis_directory):
+        logging.info("Apache SIS obtained locally from existing directory")
         return False, [apache_sis_directory]
 
     input_apache_sis_directory = _get_input_apache_sis_directory()
 
     if input_apache_sis_directory is not None:
+        logging.info("Apache SIS obtained locally from given directory")
         return False, [input_apache_sis_directory]
 
     _APACHE_URL = f"https://dlcdn.apache.org/sis/{apache_sis_version}/apache-sis-{apache_sis_version}-bin.zip"
     try:
         with tempfile.TemporaryDirectory(delete=False) as temp_dir:
-            print(f"Downloading Apache SIS version {apache_sis_version}...")
+            apache_download_msg = (
+                f"Apache SIS version {apache_sis_version}: downloading..."
+            )
+            print(apache_download_msg)
+            logging.info(apache_download_msg)
+
             response = requests.get(_APACHE_URL)
             response.raise_for_status()  # Raise an exception for bad response status codes
-            print("Download complete.")
+
+            apache_download_msg = (
+                f"Apache SIS version {apache_sis_version}: download complete."
+            )
+            print(apache_download_msg)
+            logging.info(apache_download_msg)
 
             temp_zip_file = os.path.join(temp_dir, "apache.zip")
             with open(temp_zip_file, "wb") as f:
@@ -406,6 +442,7 @@ def generate_gml_file_from_wkt(
     :param wkt: Input WKT
     :param override_file_flag: Whether the user wants to override the file if it already exists
     """
+    logging.debug(f"WKT: {wkt.split('\n')[0]}")
     # TODO: Placeholder "replace()" -> remove when ApacheSIS is updated.
     wkt = wkt.replace("GEOGCRS", "GEODCRS")
 
@@ -430,22 +467,30 @@ def generate_gml_file_from_wkt(
 
     if override_file_flag is False:
         if os.path.exists(path_to_file):
+            logging.debug(f"File {path_to_file} already exists")
             return
 
     try:
+        logging.debug("Calling Apache SIS methods...")
         # Apache SIS conversion from WKT to GML
         crs = apache_jvm.CRS.fromWKT(wkt)
         gml = str(apache_jvm.XML.marshal(crs))
+        logging.debug("Call to Apache SIS methods completed")
 
+        logging.debug("Calling GMLDataFiller...")
         data_filler = GMLDataFiller(gml, iau_version, code)
         data_filler.add_necessary_data()
+        logging.debug("Call to GMLDataFiller completed")
+
         gml = data_filler.get_gml()
+        logging.debug(f"Return GML as type '{type(gml).__name__}'")
 
         with open(path_to_file, mode="wb") as output_file:
             output_file.write(gml)
+            logging.debug("GML written to file")
 
     except jpype.JException as ex:
-        raise RuntimeError(f"Java error: {ex.message()}")
+        logging.error(f"Java error: {ex.message()}")
 
     except FileNotFoundError:
         raise FileNotFoundError("Error: File or directory not found.")
@@ -467,9 +512,13 @@ def generate_all_gml_files(
         os.makedirs(output_directory)
 
     reset_flag, override_flag = _get_user_choices(output_directory)
+    logging.info(
+        f"User choices - remove all: {reset_flag} / override files: {override_flag}"
+    )
 
     if reset_flag is True:
         _remove_xml_files_in_directory(output_directory)
+        logging.debug("Removed all XML files in directory")
 
     with open(wkt_file, mode="r") as file:
         wkts = file.read().split("\n\n")
@@ -482,6 +531,14 @@ def generate_all_gml_files(
 
 
 def main() -> None:
+    logging.basicConfig(
+        filename="gml_generator.log",
+        level=logging.INFO,
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(module)s (%(funcName)s): %(message)s",
+        datefmt="%Y/%m/%d-%H:%M:%S",
+    )
+
     # Using Apache SIS to generate the GML files
     _APACHE_SIS_VERSION = "1.4"
     _APACHE_SIS_DIRECTORY = f"apache-sis-{_APACHE_SIS_VERSION}"
@@ -495,10 +552,15 @@ def main() -> None:
 
     try:
         with ApacheJVM(apache_libs) as apache_jvm:
+            logging.info("Generating all GML files...")
             generate_all_gml_files(apache_jvm, "result.wkts", "gml")
+            logging.info("All GML files generated")
     finally:
         if temp_dir_flag:
             shutil.rmtree(_apache_sis_path[0])
+            logging.debug(
+                "Deleted temporary directory used for downloaded Apache SIS"
+            )
 
 
 if __name__ == "__main__":
