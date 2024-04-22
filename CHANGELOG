@@ -1,4 +1,14 @@
-### feat(traces): Added traces gathering with OpenTelemetry, Jaeger and Grafana. (HEAD -> feat/metrics)
+### feat(config): Updated config to not call OpenTelemetry in the Python code, but in the compose.yaml instead (HEAD -> feat/metrics)
+>Mon, 22 Apr 2024 09:25:57 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(traces): Added traces gathering with OpenTelemetry, Jaeger and Grafana. (origin/feat/metrics)
 >Wed, 17 Apr 2024 09:20:23 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)

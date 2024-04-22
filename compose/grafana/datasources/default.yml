@@ -4,7 +4,7 @@ datasources:
   - name: Jaeger
     type: jaeger
     uid: EbPG8fYoz
-    url: http://jaeger:16686
+    url: http://otlp-collector:16686
     access: proxy
     basicAuth: true
     basicAuthUser: admin
