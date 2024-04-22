@@ -54,6 +54,7 @@ class PlanetCrsRegistryLib:
             "Reading the configuration file from %s", self.__path_to_conf
         )
         self.__config.read(self.__path_to_conf)
+
         self.__app = FastAPI(
             title=openapi_config.name,
             version=openapi_config.version,

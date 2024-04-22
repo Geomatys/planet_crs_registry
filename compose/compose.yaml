@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+
+  crs-registry:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    env_file:
+      - ./settings.env
+    ports:
+      - "8080:8080"
+
+  otlp-collector:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:Z
+    depends_on:
+      - otlp-collector

@@ -49,9 +49,11 @@ RUN apt-get update && \
     apt-get install -y \
     software-properties-common apt-transport-https curl git python3-pip && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
-    pip install setuptools && \
-    git clone "https://github.com/pdssp/planet_crs_registry.git" && \
-    cd planet_crs_registry && \
+    pip install setuptools
+
+COPY . /planet_crs_registry
+
+RUN cd planet_crs_registry && \
     export API_TEST=True &&\
     make && \
     mkdir -p /conf && \
@@ -68,4 +70,4 @@ VOLUME ["/conf"]
 # Health check
 HEALTHCHECK CMD curl --fail http://localhost:8080/ping || exit 1
 
-CMD planet_crs_registry --conf_file /conf/planet_crs_registry.conf
+CMD ["opentelemetry-instrument", "planet_crs_registry", "--conf_file", "/conf/planet_crs_registry.conf"]
