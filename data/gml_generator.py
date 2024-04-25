@@ -77,7 +77,7 @@ class GMLDataFiller:
                 self._add_formula_citation_if_missing(
                     operation_method, ["remarks", "name", "identifier"]
                 )
-                self._add_identifier_on_parameters(operation_method)
+                self._remove_erroneous_parameters(operation_method)
 
         cartesian_cs = self.root_tree.find(
             f"{self.gml_ns}cartesianCS/{self.gml_ns}CartesianCS"
@@ -273,11 +273,12 @@ class GMLDataFiller:
             # TODO: Find corresponding EPSG code for all axis
             axis_type = coord.get(f"{self.gml_ns}id")
             axis_to_epsg_code = {
-                "Easting": "1",
-                "Northing": "2",
-                "Westing": "UNDEFINED",
-                "GeodeticLatitude": "106",
-                "GeodeticLongitude": "107",
+                "GeodeticLatitude": "9901",  # 106
+                "GeodeticLongitude": "9902",  # 107
+                "Easting": "9906",  # 1
+                "Northing": "9907",  # 2
+                "Westing": "9908",
+                "Southing": "9908",
                 "planetocentricLatitude": "UNDEFINED",
                 "planetocentricLongitude": "UNDEFINED",
             }
@@ -291,10 +292,10 @@ class GMLDataFiller:
                 f"Added identifier to {coord.tag.split('}')[1]} (axis)"
             )
 
-    def _add_identifier_on_parameters(self, element: etree.Element) -> None:
-        """Internal function: Adds ``<gml:identifier>`` to parameters if they don't have it.
+    def _remove_erroneous_parameters(self, element: etree.Element) -> None:
+        """Internal function: Removes parameters which do not contain an EPSG code.
 
-        :param element: lxml.etree.Element to add the identifier into
+        :param element: lxml.etree.Element to clean the parameters from
         """
         parameters = element.findall(f"{self.gml_ns}parameter")
         if len(parameters) == 0:
@@ -305,27 +306,13 @@ class GMLDataFiller:
             )
             if operation_parameter is None:
                 continue
-            identifier = operation_parameter.find(f"{self.gml_ns}identifier")
-            if identifier is not None:
-                continue
 
             param_id = operation_parameter.get(f"{self.gml_ns}id")
-            if param_id.startswith("epsg-parameter-"):
-                parameter_code = param_id.split("-")[2]
-            else:
-                # TODO: Find what to add when parameter doesn't have the format "epsg-parameter-"
-                parameter_code = "UNDEFINED"
-
-            identifier_element = etree.Element(
-                f"{self.gml_ns}identifier", codeSpace="IOGP"
-            )
-            identifier_element.text = (
-                f"urn:ogc:def:parameter:EPSG::{parameter_code}"
-            )
-            operation_parameter.insert(0, identifier_element)
-            logging.debug(
-                f"Added identifier to {operation_parameter.tag.split('}')[1]} (parameter)"
-            )
+            if not param_id.startswith("epsg-parameter-"):
+                element.remove(param)
+                logging.debug(
+                    f"Parameter removed for {element.tag.split('}')[1]}"
+                )
 
 
 def _remove_xml_files_in_directory(path_to_directory: str) -> None:
