@@ -1,4 +1,14 @@
-### feat(GML generator): Added logging (debug, info, error) to GML generator (HEAD -> feat/gml)
+### feat(GML formula): Added non-placeholder formulaCitation when missing in the GML file. Also added a formula HTML page. (HEAD -> feat/gml)
+>Thu, 25 Apr 2024 11:54:22 +0200
+
+>Author: Emile-Muller (emile.muller.contact@gmail.com)
+
+>Commiter: Emile-Muller (emile.muller.contact@gmail.com)
+
+
+
+
+### feat(GML generator): Added logging (debug, info, error) to GML generator (origin/feat/gml)
 >Fri, 19 Apr 2024 10:26:18 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
@@ -8,7 +18,7 @@
 
 
 
-### refactor(GML generator): Added typing annotation. (origin/feat/gml)
+### refactor(GML generator): Added typing annotation.
 >Thu, 18 Apr 2024 15:59:36 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)

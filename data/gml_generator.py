@@ -41,10 +41,10 @@ class GMLDataFiller:
         self.code = code
 
     def get_gml(self) -> bytes:
-        return etree.tostring(self.root_tree)
+        return etree.tostring(self.root_tree, pretty_print=True)
 
     def add_necessary_data(self) -> None:
-        """Adds ``<gml:identifier>``,  ``<gml:scope>``, and ``<gml:formula>``
+        """Adds ``<gml:identifier>``,  ``<gml:scope>``, and ``<gml:formulaCitation>``
         to certain elements for GML validation."""
         logging.debug("Adding necessary data to GML...")
 
@@ -74,7 +74,7 @@ class GMLDataFiller:
             )
             if operation_method is not None:
                 logging.debug("Found OperationMethod element")
-                self._add_formula_if_missing(
+                self._add_formula_citation_if_missing(
                     operation_method, ["remarks", "name", "identifier"]
                 )
                 self._add_identifier_on_parameters(operation_method)
@@ -95,19 +95,22 @@ class GMLDataFiller:
             self._add_identifier_if_missing(spherical_cs, "cs")
             self._add_identifier_on_axis(spherical_cs)
 
-        geodetic_crs = self.root_tree.find(
+        geodetic_prefix = ""
+
+        geodetic_crs_str = (
             f"{self.gml_ns}baseGeodeticCRS/{self.gml_ns}GeodeticCRS"
         )
+        geodetic_crs = self.root_tree.find(geodetic_crs_str)
         if geodetic_crs is not None:
             logging.debug("Found GeodeticCRS element")
             self._add_scope_if_missing(
                 geodetic_crs,
                 ["domainOfValidity", "remarks", "name", "identifier"],
             )
-            self.root_tree = geodetic_crs
+            geodetic_prefix = f"{geodetic_crs_str}/"
 
         ellipsoidal_cs = self.root_tree.find(
-            f"{self.gml_ns}ellipsoidalCS/{self.gml_ns}EllipsoidalCS"
+            f"{geodetic_prefix}{self.gml_ns}ellipsoidalCS/{self.gml_ns}EllipsoidalCS"
         )
         if ellipsoidal_cs is not None:
             logging.debug("Found EllipsoidalCS element")
@@ -115,7 +118,7 @@ class GMLDataFiller:
             self._add_identifier_on_axis(ellipsoidal_cs)
 
         geodetic_datum = self.root_tree.find(
-            f"{self.gml_ns}geodeticDatum/{self.gml_ns}GeodeticDatum"
+            f"{geodetic_prefix}{self.gml_ns}geodeticDatum/{self.gml_ns}GeodeticDatum"
         )
         if geodetic_datum is not None:
             logging.debug("Found GeodeticDatum element")
@@ -182,13 +185,13 @@ class GMLDataFiller:
         self._insert_element_after(element, scope_element, prev_elem_name_list)
         logging.debug(f"Added scope to {element.tag.split('}')[1]}")
 
-    def _add_formula_if_missing(
+    def _add_formula_citation_if_missing(
         self, element: etree.Element, prev_elem_name_list: list[str]
     ) -> None:
-        """Internal function: Adds ``<gml:formula>`` in the given element if it doesn't contain
+        """Internal function: Adds ``<gml:formulaCitation>`` in the given element if it doesn't contain
         either ``<gml:formula>`` or ``<gml:formulaCitation>``.
 
-        :param element: lxml.etree.Element to add the formula into
+        :param element: lxml.etree.Element to add the formulaCitation into
         :param prev_elem_name_list: List of elements (str) you want to insert the element after,
             picks whichever is there first, and pick the last iteration of the element
         """
@@ -197,14 +200,38 @@ class GMLDataFiller:
         if formula is not None or formula_citation is not None:
             return
 
-        # TODO: Replace with a non-placeholder formula
-        formula_element = etree.Element(f"{self.gml_ns}formula")
-        formula_element.text = "not known"
+        formula_citation_xml_str = f"""<gml:formulaCitation
+        xmlns:gml="{self.root_tree.nsmap["gml"]}"
+        xmlns:gmd="{self.root_tree.nsmap["gmd"]}"
+        xmlns:gco="{self.root_tree.nsmap["gcol"]}">
+<gmd:CI_Citation>
+  <gmd:title>
+    <gco:CharacterString>Planetary CRS formulas</gco:CharacterString>
+  </gmd:title>
+  <gmd:date>
+    <gmd:CI_Date>
+      <gmd:date>
+        <gco:DateTime>2024-04-25T09:00:00+02:00</gco:DateTime>
+      </gmd:date>
+      <gmd:dateType>
+        <gmd:CI_DateTypeCode codeList="https://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+      </gmd:dateType>
+    </gmd:CI_Date>
+  </gmd:date>
+  <gmd:otherCitationDetails>
+    <gco:CharacterString>Document available online at http://voparis-vespa-crs.obspm.fr:8080/web/formula.html</gco:CharacterString>
+  </gmd:otherCitationDetails>
+</gmd:CI_Citation>
+</gml:formulaCitation>"""
+
+        formula_citation_element = etree.fromstring(
+            formula_citation_xml_str, etree.XMLParser(remove_blank_text=True)
+        )
 
         self._insert_element_after(
-            element, formula_element, prev_elem_name_list
+            element, formula_citation_element, prev_elem_name_list
         )
-        logging.debug(f"Added formula to {element.tag.split('}')[1]}")
+        logging.debug(f"Added formulaCitation to {element.tag.split('}')[1]}")
 
     def _add_identifier_if_missing(
         self, element: etree.Element, elem_type: str
@@ -243,6 +270,7 @@ class GMLDataFiller:
             if identifier is not None:
                 continue
 
+            # TODO: Find corresponding EPSG code for all axis
             axis_type = coord.get(f"{self.gml_ns}id")
             axis_to_epsg_code = {
                 "Easting": "1",
@@ -285,6 +313,7 @@ class GMLDataFiller:
             if param_id.startswith("epsg-parameter-"):
                 parameter_code = param_id.split("-")[2]
             else:
+                # TODO: Find what to add when parameter doesn't have the format "epsg-parameter-"
                 parameter_code = "UNDEFINED"
 
             identifier_element = etree.Element(
@@ -442,7 +471,6 @@ def generate_gml_file_from_wkt(
     :param wkt: Input WKT
     :param override_file_flag: Whether the user wants to override the file if it already exists
     """
-    logging.debug(f"WKT: {wkt.split('\n')[0]}")
     # TODO: Placeholder "replace()" -> remove when ApacheSIS is updated.
     wkt = wkt.replace("GEOGCRS", "GEODCRS")
 
@@ -464,6 +492,7 @@ def generate_gml_file_from_wkt(
         raise ValueError(f"Error: {e}")
 
     path_to_file = f"{path_to_directory}/IAU_{iau_version}_{code}.xml"
+    logging.debug(f"{path_to_file} // WKT: {wkt.split('\n')[0]}")
 
     if override_file_flag is False:
         if os.path.exists(path_to_file):
