@@ -1,4 +1,16 @@
-### build(Docker): Added a Dockerfile-dev for testing purpose, which copies local files instead of cloning the remote repository. (HEAD -> build/docker)
+### fix(Docker): fix and document dev docker build (HEAD -> feat/observability)
+>Mon, 27 May 2024 14:54:48 +0200
+
+>Author: Alexis Manin (alexis.manin@geomatys.com)
+
+>Commiter: Alexis Manin (alexis.manin@geomatys.com)
+
+Remove offending install commands.
+Add a tip in contributing guide
+
+
+
+### build(Docker): Added a Dockerfile-dev for testing purpose, which copies local files instead of cloning the remote repository.
 >Thu, 23 May 2024 09:12:10 +0200
 
 >Author: emuller (emuller@geomatys.com)
@@ -8,7 +20,7 @@
 
 
 
-### fix(test): Added a method to test GML generation and changed 'make tests' to 'make test' as 'test' singular is more commonly used. (origin/main, origin/HEAD, main)
+### fix(test): Added a method to test GML generation and changed 'make tests' to 'make test' as 'test' singular is more commonly used.
 >Thu, 16 May 2024 11:00:12 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
@@ -28,7 +40,7 @@
 
 
 
-### fix(gml-generator): Added make command to generate GML, fixed Python 3.10 error, updated README
+### fix(gml-generator): Added make command to generate GML, fixed Python 3.10 error, updated README (origin/fix/gml-generator, fix/gml-generator)
 >Wed, 15 May 2024 15:00:08 +0200
 
 >Author: Emile-Muller (emile.muller.contact@gmail.com)
