@@ -1,0 +1,21 @@
+services:
+  wkt-db:
+    image: postgres:16
+    expose:
+      - 5432
+    env_file:
+      - envs/wkt-db.env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "test", "-d", "test" ]
+      retries: 10
+      interval: "2s"
+
+  # Override app configuration to use Postgres database instead of SQLite
+  api:
+    depends_on:
+      wkt-db:
+        condition: service_healthy
+    env_file:
+      - envs/wkt-db.env
+    environment:
+      API_TEST: ""

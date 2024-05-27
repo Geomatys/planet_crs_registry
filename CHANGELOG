@@ -1,4 +1,14 @@
-### feat(Compose): add a minimal compose configuration (HEAD)
+### feat(Compose): add capability to use a Postgres database (HEAD)
+>Mon, 27 May 2024 18:21:12 +0200
+
+>Author: Alexis Manin (alexis.manin@geomatys.com)
+
+>Commiter: Alexis Manin (alexis.manin@geomatys.com)
+
+
+
+
+### feat(Compose): add a minimal compose configuration
 >Mon, 27 May 2024 18:18:22 +0200
 
 >Author: Alexis Manin (alexis.manin@geomatys.com)
