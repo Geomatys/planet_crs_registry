@@ -1,4 +1,14 @@
-### fix(Docker): fix and document dev docker build (HEAD -> feat/observability)
+### feat(Compose): add a minimal compose configuration (HEAD)
+>Mon, 27 May 2024 18:18:22 +0200
+
+>Author: Alexis Manin (alexis.manin@geomatys.com)
+
+>Commiter: Alexis Manin (alexis.manin@geomatys.com)
+
+
+
+
+### fix(Docker): fix and document dev docker build
 >Mon, 27 May 2024 14:54:48 +0200
 
 >Author: Alexis Manin (alexis.manin@geomatys.com)
