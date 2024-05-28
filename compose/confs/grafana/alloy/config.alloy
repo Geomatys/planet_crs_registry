@@ -1,0 +1,36 @@
+/* TODO: find a way to add GeoIP data to OTEL traces.
+ * Currently, GeoIP processing works only for logs (loki).
+ * Therefore, the following configuration does not work, as though it represents what we aim for.
+ */
+otelcol.receiver.otlp "otel_input" {
+    grpc {}
+    output {
+      // traces = [otelcol.exporter.otlp.compose_tempo.input]
+      logs = [otelcol.exporter.loki.log_bridge.input]
+    }
+}
+
+otelcol.exporter.loki "log_bridge" {
+  forward_to = [loki.process.geoip.receiver]
+}
+
+loki.process "geoip" {
+  forward_to = [loki.write.compose_loki.receiver]
+  stage.geoip {
+    source = "http.peer.address"
+    db = "/alloy/conf/geolite2-city.mmdb"
+    db_type = "city"
+  }
+}
+
+loki.write "compose_loki" {
+    endpoint {
+        url = "http://loki:3100/loki/api/v1/push"
+    }
+}
+
+otelcol.exporter.otlp "compose_tempo" {
+  client {
+    endpoint = "grafana-tempo:4317"
+  }
+}

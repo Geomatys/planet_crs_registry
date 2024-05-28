@@ -1,0 +1,91 @@
+services:
+  api:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-alloy:4317
+
+  # Individual storage/indexing services
+  grafana-loki:
+    image: grafana/loki:3.0.0
+    command: [ "-config.file=/etc/loki.yaml" ]
+    ports:
+      - 3100:3100
+    configs:
+      - source: loki-conf
+        target: /etc/loki.yaml
+    volumes:
+      - "loki-data:/loki"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--output-document=-", "http://localhost:3100/ready"]
+
+  grafana-tempo:
+    image: grafana/tempo:2.4.2
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    configs:
+      - source: tempo-conf
+        target: /etc/tempo.yaml
+    volumes:
+      - ./confs/grafana/tempo.yaml:/etc/tempo.yaml:Z
+#      - tempo-data:/var/tempo
+#    ports:
+#      - "14268"  # jaeger ingest
+#      - "3200"   # tempo
+#      - "4317"  # otlp grpc
+#      - "4318"  # otlp http
+#      - "9411"   # zipkin
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--output-document=-", "http://localhost:3200/ready" ]
+
+  # Middleware: collect and dispatch telemetry data
+  grafana-alloy:
+    image: grafana/alloy:v1.1.0
+    expose:
+      - 4317
+    ports:
+      - 12345:12345
+#    configs:
+#      - source: alloy-conf
+#        target: /alloy/config.alloy
+    volumes:
+      - "./confs/grafana/alloy:/alloy/conf:Z"
+
+    #    volumes:
+#      - "alloy-data:/var/lib/alloy/data"
+    command:
+      - run
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "/alloy/conf/config.alloy"
+    depends_on:
+      grafana-loki:
+        condition: service_healthy
+      grafana-tempo:
+        condition: service_healthy
+    # entrypoint: ["cat", "/alloy/config.alloy"]
+
+  # Dashboard: visualize telemetry data
+  grafana:
+    image: grafana/grafana:11.0.0
+    volumes:
+      - ./confs/grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:Z
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor traceQLStreaming metricsSummary
+    ports:
+      - "3001:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthz"]
+
+configs:
+  alloy-conf:
+    file: ./confs/grafana/config.alloy
+  loki-conf:
+    file: ./confs/grafana/loki.yaml
+  tempo-conf:
+    file: ./confs/grafana/tempo.yaml
+
+volumes:
+#  alloy-data:
+  loki-data:
+  tempo-data:
