@@ -49,6 +49,11 @@ RUN apt-get update && \
     apt-get install -y \
     software-properties-common apt-transport-https curl git python3-pip
 
+RUN pip install --break-system-packages \
+    opentelemetry-distro \
+    opentelemetry-exporter-otlp-proto-grpc \
+    opentelemetry-instrumentation-fastapi
+
 COPY . /planet_crs_registry
 
 RUN cd planet_crs_registry && \
@@ -68,4 +73,5 @@ VOLUME ["/conf"]
 # Health check
 HEALTHCHECK CMD curl --fail http://localhost:8080/ping || exit 1
 
-CMD planet_crs_registry --conf_file /conf/planet_crs_registry.conf
+## CMD planet_crs_registry --conf_file /conf/planet_crs_registry.conf
+ENTRYPOINT [ "sh", "/planet_crs_registry/docker/entrypoint.sh" ]

@@ -1,4 +1,14 @@
-### feat(Compose): add observability stack using Grafana (HEAD -> feat/observability)
+### feat(Docker): add open-telemetry instrumentation (HEAD -> feat/observability)
+>Tue, 28 May 2024 17:04:39 +0200
+
+>Author: Alexis Manin (alexis.manin@geomatys.com)
+
+>Commiter: Alexis Manin (alexis.manin@geomatys.com)
+
+
+
+
+### feat(Compose): add observability stack using Grafana
 >Tue, 28 May 2024 17:03:50 +0200
 
 >Author: Alexis Manin (alexis.manin@geomatys.com)
@@ -8,7 +18,7 @@
 
 
 
-### doc(Compose): add a minimal README for compose (origin/feat/observability)
+### doc(Compose): add a minimal README for compose
 >Mon, 27 May 2024 18:22:15 +0200
 
 >Author: Alexis Manin (alexis.manin@geomatys.com)
