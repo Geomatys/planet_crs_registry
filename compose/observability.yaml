@@ -2,20 +2,28 @@ services:
   api:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-alloy:4317
+    env_file:
+      - envs/otel.env
 
   # Individual storage/indexing services
   grafana-loki:
     image: grafana/loki:3.0.0
-    command: [ "-config.file=/etc/loki.yaml" ]
+    command:
+      - "-config.file=/confs/loki.yaml"
+      # Required to enable "monolithic" mode: https://grafana.com/docs/loki/latest/get-started/deployment-modes/#monolithic-mode
+      - "-target=all"
     ports:
       - 3100:3100
-    configs:
-      - source: loki-conf
-        target: /etc/loki.yaml
+#    configs:
+#      - source: loki-conf
+#        target: /etc/loki.yaml
     volumes:
       - "loki-data:/loki"
+      - "./confs/grafana:/confs/:Z"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--output-document=-", "http://localhost:3100/ready"]
+    env_file:
+      - envs/otel.env
 
   grafana-tempo:
     image: grafana/tempo:2.4.2
@@ -47,8 +55,6 @@ services:
 #        target: /alloy/config.alloy
     volumes:
       - "./confs/grafana/alloy:/alloy/conf:Z"
-
-    #    volumes:
 #      - "alloy-data:/var/lib/alloy/data"
     command:
       - run
@@ -60,7 +66,6 @@ services:
         condition: service_healthy
       grafana-tempo:
         condition: service_healthy
-    # entrypoint: ["cat", "/alloy/config.alloy"]
 
   # Dashboard: visualize telemetry data
   grafana:

@@ -1,6 +1,7 @@
 auth_enabled: false
 
 common:
+  replication_factor: 1
   path_prefix: /loki/
   ring:
     kvstore:
